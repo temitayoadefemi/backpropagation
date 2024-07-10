@@ -1,11 +1,5 @@
 import numpy as np
-
-
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
-
-def sigmoid_derivative(x):
-    return x * (1 - x)
+from activation import sigmoid, sigmoid_derivative
 
 np.random.seed(0)
 input_layer, hidden_layer, output_layer = 2, 10, 1
