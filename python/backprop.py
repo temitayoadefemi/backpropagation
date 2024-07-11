@@ -1,5 +1,5 @@
 import numpy as np
-from activation import sigmoid, sigmoid_derivative
+from python.activation import sigmoid, sigmoid_derivative
 
 np.random.seed(0)
 input_layer, hidden_layer, output_layer = 2, 10, 1

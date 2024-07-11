@@ -1,6 +1,10 @@
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "helper.h"
+#include "activation.h"
+#include <math.h>
+
 
 #define INPUT_LAYER 2
 #define HIDDEN_LAYER 10
@@ -8,37 +12,6 @@
 
 #define LEARNING_RATE 0.5
 #define EPOCHS 10000
-
-double box_muller_transform(double mean, double stddev) {
-    static double n2 = 0.0;
-    static int n2_cached = 0;
-
-    if (!n2_cached) {
-        double x, y, r;
-    do{   
-        x = 2.0*rand()/RAND_MAX - 1;
-        y = 2.0*rand()/RAND_MAX - 1;
-        r = x*x + y*y;
-    } while (r == 0 || r > 1.0);
-        double d = sqrt(-2.0*log(r)/r);
-        double n1 = x*d;
-        n2 = y*d;
-        double result = n1*stddev + mean;
-        n2_cached = 1;
-        return result;
-    } else {
-        n2_cached = 0;
-        return n2*stddev + mean;
-    }
-}
-
-double sigmoid(double x) {
-    return 1.0 / (1.0 + exp(-x));
-}
-
-double sigmoid_derivative(double x) {
-    return x * (1 - x);
-}
 
 
 double w1[INPUT_LAYER][HIDDEN_LAYER];
@@ -57,11 +30,11 @@ void init_weights() {
     srand(time(NULL));
 
     for (int i = 0; i < INPUT_LAYER; i++)
-        for (int j = 0; i < HIDDEN_LAYER; j++)
+        for (int j = 0; j < HIDDEN_LAYER; j++)
             w1[i][j] = box_muller_transform(0, 0.1);
 
-    for (int i = 0; i < INPUT_LAYER; i++)
-        for (int j = 0; i < HIDDEN_LAYER; j++)
+    for (int i = 0; i < HIDDEN_LAYER; i++)
+        for (int j = 0; j < OUTPUT_LAYER; j++)
             w2[i][j] = box_muller_transform(0, 0.1);
 
     for (int i = 0; i < HIDDEN_LAYER; i++) 
@@ -116,8 +89,8 @@ void backward_pass(double *x, double target) {
 
 int main() {
     init_weights();
-    int X[4][2] = {{1, 1}, {0, 1}, {1, 0}, {0, 0}};
-    int y[4] = {0, 1, 1, 0};
+    double X[4][2] = {{1, 1}, {0, 1}, {1, 0}, {0, 0}};
+    double y[4] = {0, 1, 1, 0};
 
     for (int epoch = 0; epoch < EPOCHS; epoch++) {
         for (int i = 0; i < 4; i++) {
@@ -125,5 +98,13 @@ int main() {
             backward_pass(X[i], y[i]);
         }
     }
+
+        // Test the network after training
+    for (int i = 0; i < 4; i++) {
+        forward_pass(X[i]);
+        printf("Input: [%d, %d] - Predicted: %f\n", (int)X[i][0], (int)X[i][1], final_output[0]);
+    }
+
+    return 0;
 
 }
