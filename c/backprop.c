@@ -4,6 +4,7 @@
 #include "helper.h"
 #include "activation.h"
 #include <math.h>
+#include <Accelerate/Accelerate.h>
 
 
 #define INPUT_LAYER 2
@@ -46,25 +47,18 @@ void init_weights() {
 
 
 void forward_pass(double *x) {
+    // Compute hidden layer activations
     for (int i = 0; i < HIDDEN_LAYER; i++) {
-        hidden_input[i] = 0;
-        for (int j = 0; j < INPUT_LAYER; j++) {
-            hidden_input[i] += w1[j][i] * x[j];
-        }
-        hidden_input[i] += b1[i];
+        hidden_input[i] = b1[i] + cblas_ddot(INPUT_LAYER, w1[i], 1, x, 1);
         hidden_output[i] = sigmoid(hidden_input[i]);
     }
 
+    // Compute output layer activations
     for (int i = 0; i < OUTPUT_LAYER; i++) {
-        final_input[i] = 0;
-        for (int j = 0; j < HIDDEN_LAYER; j++) {
-            final_input[i] += w2[j][i] * hidden_output[j];
-        }
-        final_input[i] += b2[i];
-        final_output[i] = sigmoid(final_output[i]);
+        final_input[i] = b2[i] + cblas_ddot(HIDDEN_LAYER, w2[i], 1, hidden_output, 1);
+        final_output[i] = sigmoid(final_input[i]);
     }
 }
-
 
 void backward_pass(double *x, double target) {
     double output_error = target - final_output[0];
